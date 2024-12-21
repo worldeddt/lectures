@@ -1,2 +1,2 @@
 # lectures
-강의 예약 api
+수강 신청 api
