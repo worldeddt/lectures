@@ -1,0 +1,21 @@
+
+
+
+services:
+  db:
+    image: "mariadb:latest"
+    container_name: db
+    ports:
+      - "3306:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: eddy
+    volumes:
+      - ./docker/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    depends_on:
+      - redis
+
+  redis:
+    image: "redis:latest"
+    container_name: myRedis
+    ports:
+      - "6379:6379"
