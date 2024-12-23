@@ -9,21 +9,18 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("lecture")
-public class Lecture extends BaseEntity {
+@Table("lecture_application")
+public class LectureApplication extends BaseEntity {
     @Id
-    @Column("lecture_id")
+    @Column("lecture_application_id")
     private Long id;
-    private String name;
-    private String description;
-    private Long seatCount;
-    private LocalDateTime startTime;
-    private Long instructorId;
-    private Long venueId;
+    @Column("attender_id")
+    private Long attenderId;
+    @Column("attender_id")
+    private Long lectureId;
+    private String status;
 }
