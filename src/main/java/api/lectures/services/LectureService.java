@@ -60,7 +60,7 @@ public class LectureService {
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Lecture not found"))); // 강의가 없을 경우 처리
     }
 
-    public Mono<List<LectureDto>> findLectureAll() {
+    public Mono<List<LectureDto>> getLectureAll() {
         return lectureRepository.findAll()
                 .flatMap(lecture -> Mono.zip(
                         Mono.just(lecture),
