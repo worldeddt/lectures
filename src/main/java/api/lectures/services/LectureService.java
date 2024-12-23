@@ -6,7 +6,6 @@ import api.lectures.entities.Instructor;
 import api.lectures.entities.Lecture;
 import api.lectures.entities.Venue;
 import api.lectures.enums.LectureApplicationStatus;
-import api.lectures.exception.ApplicationAdvice;
 import api.lectures.exception.ErrorCode;
 import api.lectures.repository.*;
 import api.lectures.services.dto.AttenderDto;

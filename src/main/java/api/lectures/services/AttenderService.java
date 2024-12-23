@@ -2,6 +2,7 @@ package api.lectures.services;
 
 
 import api.lectures.entities.Attender;
+import api.lectures.enums.AttenderStatus;
 import api.lectures.exception.ErrorCode;
 import api.lectures.repository.AttenderRepository;
 import api.lectures.services.dto.AttenderDto;
@@ -25,12 +26,14 @@ public class AttenderService {
                         .tel(attenderDto.getTel())
                         .name(attenderDto.getName())
                         .attenderNumber(attenderDto.getAttenderNumber())
+                        .status(AttenderStatus.REGISTER.name())
                         .build()
         );
     }
 
     public Mono<AttenderDto> findAttenderById(Long id) {
         return attenderRepository.findById(id)
+                .filter(attender -> attender.getStatus().equals(AttenderStatus.REGISTER))
                 .switchIfEmpty(
                         Mono.error(ErrorCode.INVALID_ATTENDER_ID.build())
                 )
@@ -48,6 +51,7 @@ public class AttenderService {
 
     public Mono<List<AttenderDto>> findAttenders() {
         return attenderRepository.findAll()
+                .filter(attender -> attender.getStatus().equals(AttenderStatus.REGISTER))
                 .collectList()
                 .flatMap(attenders -> {
                     if (attenders.isEmpty()) {

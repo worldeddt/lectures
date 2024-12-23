@@ -5,7 +5,6 @@ import api.lectures.controller.dto.CreateInstructorDto;
 import api.lectures.entities.Instructor;
 import api.lectures.services.InstructorService;
 import api.lectures.services.dto.InstructorDto;
-import api.lectures.services.dto.VenueDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

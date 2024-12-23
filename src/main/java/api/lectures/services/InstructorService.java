@@ -2,15 +2,10 @@ package api.lectures.services;
 
 
 import api.lectures.controller.dto.CreateInstructorDto;
-import api.lectures.controller.dto.CreateVenueDto;
-import api.lectures.entities.Attender;
 import api.lectures.entities.Instructor;
-import api.lectures.entities.Venue;
 import api.lectures.exception.ErrorCode;
 import api.lectures.repository.InstructorRepository;
-import api.lectures.services.dto.AttenderDto;
 import api.lectures.services.dto.InstructorDto;
-import api.lectures.services.dto.VenueDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
