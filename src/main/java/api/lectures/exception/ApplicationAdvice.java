@@ -3,7 +3,6 @@ package api.lectures.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import reactor.core.publisher.Mono;
@@ -30,19 +29,6 @@ public class ApplicationAdvice {
                                 String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
                                 ex.getMessage())
                 )));
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    Mono<ResponseEntity<ServerExceptionResponse>> handleValidationException(MethodArgumentNotValidException ex) {
-        String reason = ex.getBindingResult().getAllErrors().stream()
-                .map(error-> error.getDefaultMessage())
-                .findFirst()
-                .orElse("Validation failed");
-
-        log.error("Validation Error: {}", reason);
-        return Mono.defer(() -> Mono.just(ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ServerExceptionResponse(String.valueOf(HttpStatus.BAD_REQUEST.value()), reason))));
     }
 
     public record ServerExceptionResponse(String code, String reason, String details) {

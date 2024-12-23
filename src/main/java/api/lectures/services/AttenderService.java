@@ -33,7 +33,7 @@ public class AttenderService {
 
     public Mono<AttenderDto> findAttenderById(Long id) {
         return attenderRepository.findById(id)
-                .filter(attender -> attender.getStatus().equals(AttenderStatus.REGISTER))
+                .filter(attender -> attender.getStatus().equals(AttenderStatus.REGISTER.name()))
                 .switchIfEmpty(
                         Mono.error(ErrorCode.INVALID_ATTENDER_ID.build())
                 )
@@ -51,7 +51,7 @@ public class AttenderService {
 
     public Mono<List<AttenderDto>> findAttenders() {
         return attenderRepository.findAll()
-                .filter(attender -> attender.getStatus().equals(AttenderStatus.REGISTER))
+                .filter(attender -> attender.getStatus().equals(AttenderStatus.REGISTER.name()))
                 .collectList()
                 .flatMap(attenders -> {
                     if (attenders.isEmpty()) {
