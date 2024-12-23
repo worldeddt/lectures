@@ -20,7 +20,7 @@ public class Lecture extends BaseEntity {
     @Id
     @Column("lecture_id")
     private Long id;
-    private String name;
+    private String title;
     private String description;
     private Long seatCount;
     private LocalDateTime startTime;

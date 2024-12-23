@@ -7,4 +7,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class InstructorDto {
+    private Long id;
+    private String name;
+    private String phone;
 }
