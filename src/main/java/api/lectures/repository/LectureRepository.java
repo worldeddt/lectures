@@ -10,6 +10,12 @@ import reactor.core.publisher.Flux;
 @Repository
 public interface LectureRepository extends ReactiveCrudRepository<Lecture, Long> {
 
-    @Query("SELECT * FROM lecture WHERE NOW() BETWEEN start_time AND DATE_ADD(start_time, INTERVAL 1 DAY)")
+    @Query("""
+        SELECT 
+            * 
+        FROM 
+            lecture WHERE NOW() BETWEEN DATE_SUB(start_time, INTERVAL 7 DAY) 
+        AND DATE_ADD(start_time, INTERVAL 1 DAY)
+    """)
     Flux<Lecture> findAllAvailableLectures();
 }

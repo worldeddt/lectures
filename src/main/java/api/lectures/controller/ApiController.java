@@ -81,6 +81,7 @@ public class ApiController {
                 );
     }
 
+    @Description("실시간 인기 강연")
     @GetMapping("/lectures/popular")
     public Mono<ResponseEntity<List<ResponseLectureDto>>> getPopularLectures() {
         return lectureApplicationService.getPopularLectures()

@@ -41,11 +41,16 @@ reactor 를 사용하게 되었습니다.
 ---
 ## 환경 세팅
 
-### 1. docker compose 로 mysql, redis 띄우기. 
+### 1. docker compose 로 mysql, redis 컨테이터 생성 
 ```
 docker-compose build
 dokcer-compose up -d 
 ```
 
+---
+## 호출
+
+back office : "/api/v1/back"
+front : "/api/v1/front"
 
 
