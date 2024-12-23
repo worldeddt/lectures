@@ -4,10 +4,12 @@ package api.lectures.controller;
 import api.lectures.controller.dto.CreateLectureDto;
 import api.lectures.entities.Lecture;
 import api.lectures.services.LectureService;
+import api.lectures.services.dto.AttenderDto;
 import api.lectures.services.dto.LectureDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -41,4 +43,10 @@ public class BackOfficeController {
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().body(null)));
     }
 
+    @GetMapping("/lecture/{lectureId}/attenders")
+    public Flux<ResponseEntity<AttenderDto>> getAttenders(@PathVariable Long lectureId) {
+        return lectureService.getAttendersByLectureId(lectureId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.noContent().build());
+    }
 }

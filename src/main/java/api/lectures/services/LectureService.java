@@ -5,10 +5,11 @@ import api.lectures.controller.dto.CreateLectureDto;
 import api.lectures.entities.Instructor;
 import api.lectures.entities.Lecture;
 import api.lectures.entities.Venue;
+import api.lectures.enums.LectureApplicationStatus;
+import api.lectures.exception.ApplicationAdvice;
 import api.lectures.exception.ErrorCode;
-import api.lectures.repository.InstructorRepository;
-import api.lectures.repository.LectureRepository;
-import api.lectures.repository.VenueRepository;
+import api.lectures.repository.*;
+import api.lectures.services.dto.AttenderDto;
 import api.lectures.services.dto.InstructorDto;
 import api.lectures.services.dto.LectureDto;
 import api.lectures.services.dto.VenueDto;
@@ -27,6 +28,9 @@ public class LectureService {
     private final LectureRepository lectureRepository;
     private final InstructorRepository instructorRepository;
     private final VenueRepository venueRepository;
+    private final LectureApplicationRepository lectureApplicationRepository;
+    private final AttenderRepository attenderRepository;
+    private final ApplicationAdvice applicationAdvice;
 
     public Mono<LectureDto> getLectureDetails(Long lectureId) {
         return lectureRepository.findById(lectureId)
@@ -128,6 +132,21 @@ public class LectureService {
                             return lectureRepository.save(lecture);
                         })
                 );
+    }
+
+    public Flux<AttenderDto> getAttendersByLectureId(Long lectureId) {
+        return lectureApplicationRepository.findAllByLectureId(lectureId)
+                .filter(lectureApplication ->
+                        lectureApplication.getStatus().equals(LectureApplicationStatus.REGISTER.name()))
+                .flatMap(application ->
+                        attenderRepository.findById(application.getAttenderId())
+                        .map(attender -> AttenderDto.builder()
+                                .id(attender.getId())
+                                .name(attender.getName())
+                                .tel(attender.getTel())
+                                .attenderNumber(attender.getAttenderNumber())
+                                .build()
+                        ));
     }
 
     public Flux<List<LectureDto>> favoriteLectures() {
