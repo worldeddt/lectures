@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/front")
 @RequiredArgsConstructor
@@ -78,22 +81,30 @@ public class ApiController {
     }
 
     @GetMapping("/lecture/popular")
-    public Flux<ResponseLectureDto> getPopularLectures() {
+    public Mono<ResponseEntity<List<ResponseLectureDto>>> getPopularLectures() {
         return lectureApplicationService.getPopularLectures()
-        .switchIfEmpty(
-                Flux.just()
-        ).flatMap(
-                lecture -> Flux.just(
-                        ResponseLectureDto.builder()
-                                .id(lecture.getId())
-                                .title(lecture.getTitle())
-                                .description(lecture.getDescription())
-                                .instructorId(lecture.getInstructorId())
-                                .venueId(lecture.getVenueId())
-                                .maxAttendees(lecture.getMaxAttendees())
-                                .currentAttendees(lecture.getCurrentAttendees())
-                                .build()
-                )
-        );
+                .collectList()
+                .flatMap(
+                        lectures -> {
+                            if (lectures.isEmpty()) {
+                                return Mono.just(ResponseEntity.noContent().build());
+                            } else {
+                                List<ResponseLectureDto> responseLectureDtos = new ArrayList<>();
+                                for (Lecture lecture : lectures) {
+                                    responseLectureDtos.add(
+                                            ResponseLectureDto.builder()
+                                                    .id(lecture.getId())
+                                                    .title(lecture.getTitle())
+                                                    .description(lecture.getDescription())
+                                                    .instructorId(lecture.getInstructorId())
+                                                    .venueId(lecture.getVenueId())
+                                                    .maxAttendees(lecture.getMaxAttendees())
+                                                    .currentAttendees(lecture.getCurrentAttendees())
+                                                    .build());
+                                }
+                                return Mono.just(ResponseEntity.ok().body(responseLectureDtos));
+                            }
+                        }
+                );
     }
 }
