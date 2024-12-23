@@ -7,6 +7,7 @@ import api.lectures.services.dto.LectureDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
@@ -28,5 +29,11 @@ public class BackOfficeController {
         );
     }
 
+    @GetMapping("/{lectureId}/details")
+    public Mono<ResponseEntity<LectureDto>> getLectureDetails(@PathVariable Long lectureId) {
+        return lectureService.getLectureDetails(lectureId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
 }
