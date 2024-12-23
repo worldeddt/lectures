@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/front")
+@RequestMapping("/api/v1/front")
 @RequiredArgsConstructor
 public class ApiController {
 
