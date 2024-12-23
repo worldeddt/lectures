@@ -21,4 +21,5 @@ public class Attender extends BaseEntity {
     private String attenderNumber;
     private String name;
     private String tel;
+    private String status;
 }
