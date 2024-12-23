@@ -9,7 +9,7 @@ spring:
   application:
     name: lectures
   r2dbc:
-    url: r2dbc:mariadb://localhost:3306/lecture
+    url: r2dbc:mysql://localhost:3306/lecture
     username: root
     password: eddy
   data:

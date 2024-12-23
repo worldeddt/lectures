@@ -30,7 +30,6 @@ public class LectureService {
     private final VenueRepository venueRepository;
     private final LectureApplicationRepository lectureApplicationRepository;
     private final AttenderRepository attenderRepository;
-    private final ApplicationAdvice applicationAdvice;
 
     public Mono<LectureDto> getLectureDetails(Long lectureId) {
         return lectureRepository.findById(lectureId)

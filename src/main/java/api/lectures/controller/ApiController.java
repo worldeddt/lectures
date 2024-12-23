@@ -53,7 +53,7 @@ public class ApiController {
     }
 
     @Description("강연 목록(신청 가능한 시점 부터 강연 시작 시간 1일 후까지 노출)")
-    @GetMapping("/lecture/available")
+    @GetMapping("/lectures/available")
     public Mono<ResponseEntity<List<ResponseLectureDto>>> getAvailableLectures() {
         return lectureService.getAvailableLectures()
                 .collectList()
@@ -81,7 +81,7 @@ public class ApiController {
                 );
     }
 
-    @GetMapping("/lecture/popular")
+    @GetMapping("/lectures/popular")
     public Mono<ResponseEntity<List<ResponseLectureDto>>> getPopularLectures() {
         return lectureApplicationService.getPopularLectures()
                 .collectList()
