@@ -1,6 +1,7 @@
 package api.lectures.services;
 
 
+import api.lectures.entities.Lecture;
 import api.lectures.entities.LectureApplication;
 import api.lectures.enums.LectureApplicationStatus;
 import api.lectures.exception.ErrorCode;
@@ -74,5 +75,9 @@ public class LectureApplicationService {
 
     public Flux<LectureApplication> getApplicationsByAttenderNumber(String attenderNumber) {
         return lectureApplicationRepository.findByAttenderNumber(attenderNumber);
+    }
+
+    public Flux<Lecture> getPopularLectures() {
+        return lectureApplicationRepository.findTopPopularLecturesForLast3Days();
     }
 }

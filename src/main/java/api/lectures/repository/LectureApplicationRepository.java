@@ -29,17 +29,17 @@ public interface LectureApplicationRepository extends ReactiveCrudRepository<Lec
     Flux<LectureApplication> findByAttenderNumber(String attenderNumber);
 
     @Query("""
-       SELECT 
-           lec.*, 
-           COUNT(a.lecture_application_id) AS application_count
-       FROM lecture lec
-       JOIN lecture_application app
-           ON lec.id = app.lecture_id
-       WHERE app.created_at >= DATE_SUB(NOW(), INTERVAL 3 DAY)
-       AND app.status != 'CANCELED'
-       GROUP BY lec.id
-       ORDER BY application_count DESC
-       LIMIT 5
+            SELECT
+                  lec.*,
+                  COUNT(app.lecture_application_id) AS application_count
+              FROM lecture lec
+                       JOIN lecture_application app
+                            ON lec.lecture_id = app.lecture_id
+              WHERE app.created_at >= DATE_SUB(NOW(), INTERVAL 3 DAY)
+                AND app.status != 'CANCELED'
+              GROUP BY lec.lecture_id
+              ORDER BY application_count DESC
+              LIMIT 5
        """)
     Flux<Lecture> findTopPopularLecturesForLast3Days();
 }

@@ -3,6 +3,7 @@ package api.lectures.controller;
 
 import api.lectures.controller.dto.ResponseLectureApplicationDto;
 import api.lectures.controller.dto.ResponseLectureDto;
+import api.lectures.entities.Lecture;
 import api.lectures.exception.ErrorCode;
 import api.lectures.services.LectureApplicationService;
 import api.lectures.services.LectureService;
@@ -48,7 +49,7 @@ public class ApiController {
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
 
-    @Description("강연목록(신청가능한시점부터강연시작시간1일후까지노출)")
+    @Description("강연 목록(신청 가능한 시점 부터 강연 시작 시간 1일 후까지 노출)")
     @GetMapping("/lecture/available")
     public Flux<ResponseLectureDto> getAvailableLectures() {
         return lectureService.getAvailableLectures()
@@ -76,4 +77,23 @@ public class ApiController {
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
 
+    @GetMapping("/lecture/popular")
+    public Flux<ResponseLectureDto> getPopularLectures() {
+        return lectureApplicationService.getPopularLectures()
+        .switchIfEmpty(
+                Flux.just()
+        ).flatMap(
+                lecture -> Flux.just(
+                        ResponseLectureDto.builder()
+                                .id(lecture.getId())
+                                .title(lecture.getTitle())
+                                .description(lecture.getDescription())
+                                .instructorId(lecture.getInstructorId())
+                                .venueId(lecture.getVenueId())
+                                .maxAttendees(lecture.getMaxAttendees())
+                                .currentAttendees(lecture.getCurrentAttendees())
+                                .build()
+                )
+        );
+    }
 }
