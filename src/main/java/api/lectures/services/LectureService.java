@@ -1,8 +1,11 @@
 package api.lectures.services;
 
 
+import api.lectures.controller.dto.CreateLectureDto;
 import api.lectures.entities.Instructor;
+import api.lectures.entities.Lecture;
 import api.lectures.entities.Venue;
+import api.lectures.exception.ErrorCode;
 import api.lectures.repository.InstructorRepository;
 import api.lectures.repository.LectureRepository;
 import api.lectures.repository.VenueRepository;
@@ -30,9 +33,9 @@ public class LectureService {
                 .flatMap(lecture -> Mono.zip(
                         Mono.just(lecture),
                         instructorRepository.findById(lecture.getInstructorId())
-                                .switchIfEmpty(Mono.just(new Instructor())), // 강연자 정보 없을 경우 기본값
+                                .switchIfEmpty(Mono.just(new Instructor())),
                         venueRepository.findById(lecture.getVenueId())
-                                .switchIfEmpty(Mono.just(new Venue())) // 강연장 정보 없을 경우 기본값
+                                .switchIfEmpty(Mono.just(new Venue()))
                 ).map(tuple -> LectureDto.builder()
                         .id(tuple.getT1().getId())
                         .title(tuple.getT1().getTitle())
@@ -43,7 +46,7 @@ public class LectureService {
                                                 .phone(instructor.getPhone())
                                                 .name(instructor.getName())
                                                 .build()
-                                        ).orElse(null) // null-safe 처리
+                                        ).orElse(null)
                         )
                         .venue(
                                 Optional.ofNullable(tuple.getT3())
@@ -53,11 +56,11 @@ public class LectureService {
                                                 .name(venue.getName())
                                                 .seatCount(venue.getSeatCount())
                                                 .build()
-                                        ).orElse(null) // null-safe 처리
+                                        ).orElse(null)
                         )
                         .build()
                 ))
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("Lecture not found"))); // 강의가 없을 경우 처리
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Lecture not found")));
     }
 
     public Mono<List<LectureDto>> getLectureAll() {
@@ -65,9 +68,9 @@ public class LectureService {
                 .flatMap(lecture -> Mono.zip(
                         Mono.just(lecture),
                         instructorRepository.findById(lecture.getInstructorId())
-                                .switchIfEmpty(Mono.just(new Instructor())), // 기본값 제공
+                                .switchIfEmpty(Mono.just(new Instructor())),
                         venueRepository.findById(lecture.getVenueId())
-                                .switchIfEmpty(Mono.just(new Venue())) // 기본값 제공
+                                .switchIfEmpty(Mono.just(new Venue()))
                 ).map(tuple -> LectureDto.builder()
                         .id(tuple.getT1().getId())
                         .title(tuple.getT1().getTitle())
@@ -78,7 +81,7 @@ public class LectureService {
                                                 .phone(instructor.getPhone())
                                                 .name(instructor.getName())
                                                 .build()
-                                        ).orElse(null) // null-safe 처리
+                                        ).orElse(null)
                         )
                         .venue(
                                 Optional.ofNullable(tuple.getT3())
@@ -88,14 +91,44 @@ public class LectureService {
                                                 .name(venue.getName())
                                                 .seatCount(venue.getSeatCount())
                                                 .build()
-                                        ).orElse(null) // null-safe 처리
+                                        ).orElse(null)
                         )
                         .build()
                 ))
-                .collectList(); // Flux를 Mono<List>로 변환
+                .collectList();
     }
 
+    public Mono<Lecture> createLecture(CreateLectureDto request) {
+        // 강연자와 강연장의 유효성 검증
+        return instructorRepository.findById(request.getInstructorId())
+                .switchIfEmpty(
+                        Mono.error(
+                                ErrorCode.INVALID_VENUE_ID.build()
+                        )
+                )
+                .flatMap(instructor -> venueRepository.findById(request.getVenueId())
+                        .switchIfEmpty(
+                                Mono.error(
+                                        ErrorCode.INVALID_VENUE_ID.build()
+                                )
+                        )
+                        .flatMap(venue -> {
 
+                            if (venue.getSeatCount() < request.getSeatCount()) {
+                                return Mono.error(ErrorCode.OVER_SEAT_COUNT_REGISTERING.build());
+                            }
+
+                            // 유효성 검증 성공 시 Lecture 생성
+                            Lecture lecture = new Lecture();
+                            lecture.setTitle(request.getTitle());
+                            lecture.setStartTime(request.getStartTime());
+                            lecture.setInstructorId(request.getInstructorId());
+                            lecture.setVenueId(request.getVenueId());
+                            lecture.setSeatCount(request.getSeatCount());
+                            return lectureRepository.save(lecture);
+                        })
+                );
+    }
 
     public Flux<List<LectureDto>> favoriteLectures() {
         return null;

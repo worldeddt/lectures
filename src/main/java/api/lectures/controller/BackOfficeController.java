@@ -1,14 +1,13 @@
 package api.lectures.controller;
 
 
+import api.lectures.controller.dto.CreateLectureDto;
+import api.lectures.entities.Lecture;
 import api.lectures.services.LectureService;
 import api.lectures.services.dto.LectureDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -34,4 +33,12 @@ public class BackOfficeController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.noContent().build());
     }
+
+    @PostMapping("/lecture")
+    public Mono<ResponseEntity<Lecture>> createLecture(@RequestBody CreateLectureDto request) {
+        return lectureService.createLecture(request)
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().body(null)));
+    }
+
 }
