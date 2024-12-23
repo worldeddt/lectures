@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AttenderService {
@@ -40,6 +43,31 @@ public class AttenderService {
                                 .tel(attender.getTel())
                                 .build()
                     );
+                });
+    }
+
+    public Mono<List<AttenderDto>> findAttenders() {
+        return attenderRepository.findAll()
+                .collectList()
+                .flatMap(attenders -> {
+                    if (attenders.isEmpty()) {
+                        return Mono.empty();
+                    } else {
+                        List<AttenderDto> attenderDtos = new ArrayList<>();
+
+                        for (Attender attender : attenders) {
+                            attenderDtos.add(
+                                    AttenderDto.builder()
+                                            .id(attender.getId())
+                                            .tel(attender.getTel())
+                                            .attenderNumber(attender.getAttenderNumber())
+                                            .tel(attender.getTel())
+                                            .build()
+                            );
+                        }
+
+                        return Mono.just(attenderDtos);
+                    }
                 });
     }
 }
