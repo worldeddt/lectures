@@ -102,6 +102,21 @@ public class LectureService {
                 .collectList();
     }
 
+    public Mono<List<AttenderDto>> getAttendersByLectureId(Long lectureId) {
+        return lectureApplicationRepository.findAllByLectureId(lectureId)
+                .filter(lectureApplication ->
+                        lectureApplication.getStatus().equals(LectureApplicationStatus.REGISTER.name()))
+                .flatMap(application ->
+                        attenderRepository.findById(application.getAttenderId())
+                                .map(attender -> AttenderDto.builder()
+                                        .id(attender.getId())
+                                        .name(attender.getName())
+                                        .tel(attender.getTel())
+                                        .attenderNumber(attender.getAttenderNumber())
+                                        .build()
+                                )).collectList();
+    }
+
     public Mono<Lecture> createLecture(CreateLectureDto request) {
         // 강연자와 강연장의 유효성 검증
         return instructorRepository.findById(request.getInstructorId())
@@ -133,22 +148,6 @@ public class LectureService {
                         })
                 );
     }
-
-    public Flux<AttenderDto> getAttendersByLectureId(Long lectureId) {
-        return lectureApplicationRepository.findAllByLectureId(lectureId)
-                .filter(lectureApplication ->
-                        lectureApplication.getStatus().equals(LectureApplicationStatus.REGISTER.name()))
-                .flatMap(application ->
-                        attenderRepository.findById(application.getAttenderId())
-                        .map(attender -> AttenderDto.builder()
-                                .id(attender.getId())
-                                .name(attender.getName())
-                                .tel(attender.getTel())
-                                .attenderNumber(attender.getAttenderNumber())
-                                .build()
-                        ));
-    }
-
 
     public Flux<Lecture> getAvailableLectures() {
         return lectureRepository.findAllAvailableLectures();

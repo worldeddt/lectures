@@ -117,7 +117,7 @@ public class ApiController {
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
 
-    @Description("강연신청(사번 입력,같은 강연 중복 신청 제한)")
+    @Description("강연 신청(사번 입력,같은 강연 중복 신청 제한)")
     @PostMapping("/lecture/{lectureId}/apply")
     public Mono<ResponseEntity<Object>> applyForLecture(@PathVariable Long lectureId, @RequestParam Long attenderId) {
         return lectureApplicationService.applyForLecture(lectureId, attenderId)
