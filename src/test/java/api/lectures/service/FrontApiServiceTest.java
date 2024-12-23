@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -25,18 +26,28 @@ public class FrontApiServiceTest {
     @Autowired
     private LectureService lectureService;
 
-    @MockBean
+    @MockitoBean
     private LectureRepository lectureRepository;
 
-    @MockBean
+    @MockitoBean
     private LectureApplicationRepository lectureApplicationRepository;
 
     //강연 신청 가능 목록 테스트
     @Test
     void shouldReturnAvailableLectures() {
         List<Lecture> lectures = List.of(
-                new Lecture(1L, "Reactive Programming", "Learn Reactive Programming", 50, 30, LocalDateTime.of(2024, 12, 30, 10, 0), 1L, 1L),
-                new Lecture(2L, "Spring WebFlux", "Introduction to WebFlux", 100, 80, LocalDateTime.of(2024, 12, 25, 14, 0), 2L, 2L)
+                new Lecture(1L,
+                        "Reactive Programming",
+                        "Learn Reactive Programming",
+                        50,
+                        30,
+                        LocalDateTime.of(2024, 12, 30, 10, 0), 1L, 1L),
+                new Lecture(2L,
+                        "Spring WebFlux",
+                        "Introduction to WebFlux",
+                        100,
+                        80,
+                        LocalDateTime.of(2024, 12, 25, 14, 0), 2L, 2L)
         );
 
         when(lectureRepository.findAllAvailableLectures())
