@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 public enum ErrorCode {
+    INVALID_ATTENDER_ID(HttpStatus.CONFLICT, "LC_0004", "invalid instructor id"),
     INVALID_INSTRUCTOR_ID(HttpStatus.CONFLICT, "LC_0004", "invalid instructor id"),
     INVALID_VENUE_ID(HttpStatus.CONFLICT, "LC_0003", "invalid venue id"),
     OVER_SEAT_COUNT_REGISTERING(HttpStatus.CONFLICT, "LC_0002", "over seat registering"),
