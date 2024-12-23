@@ -38,6 +38,14 @@ redis
 
 reactor 를 사용하게 되었습니다.
 
+---
+## 환경 세팅
+
+### 1. docker compose 로 mysql, redis 띄우기. 
+```
+docker-compose build
+dokcer-compose up -d 
+```
 
 
 
