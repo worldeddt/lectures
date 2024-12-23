@@ -1,7 +1,6 @@
 package api.lectures.controller;
 
 
-import api.lectures.entities.Instructor;
 import api.lectures.services.dto.InstructorDto;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

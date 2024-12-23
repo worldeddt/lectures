@@ -5,11 +5,13 @@ import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 public enum ErrorCode {
-    INVALID_ATTENDER_ID(HttpStatus.CONFLICT, "LC_0004", "invalid instructor id"),
-    INVALID_INSTRUCTOR_ID(HttpStatus.CONFLICT, "LC_0004", "invalid instructor id"),
-    INVALID_VENUE_ID(HttpStatus.CONFLICT, "LC_0003", "invalid venue id"),
-    OVER_SEAT_COUNT_REGISTERING(HttpStatus.CONFLICT, "LC_0002", "over seat registering"),
-    NOT_FOUND_LECTURE(HttpStatus.CONFLICT, "LC_0001", "not found lecture");
+    ATTENDER_DUPLICATED(HttpStatus.BAD_REQUEST, "LC_0007", "duplicate attender"),
+    LECTURE_IS_FULL(HttpStatus.BAD_REQUEST, "LC_0006", "lecture full"),
+    INVALID_ATTENDER_ID(HttpStatus.BAD_REQUEST, "LC_0005", "invalid attender id"),
+    INVALID_INSTRUCTOR_ID(HttpStatus.BAD_REQUEST, "LC_0004", "invalid instructor id"),
+    INVALID_VENUE_ID(HttpStatus.BAD_REQUEST, "LC_0003", "invalid venue id"),
+    OVER_SEAT_COUNT_REGISTERING(HttpStatus.BAD_REQUEST, "LC_0002", "over seat registering"),
+    NOT_FOUND_LECTURE(HttpStatus.NOT_FOUND, "LC_0001", "not found lecture");
 
     private final HttpStatus httpStatus;
     private final String code;

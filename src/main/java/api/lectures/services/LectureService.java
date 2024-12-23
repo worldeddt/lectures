@@ -128,7 +128,7 @@ public class LectureService {
                             lecture.setStartTime(request.getStartTime());
                             lecture.setInstructorId(request.getInstructorId());
                             lecture.setVenueId(request.getVenueId());
-                            lecture.setSeatCount(request.getSeatCount());
+                            lecture.setMaxAttendees(request.getSeatCount());
                             return lectureRepository.save(lecture);
                         })
                 );
@@ -149,11 +149,8 @@ public class LectureService {
                         ));
     }
 
-    public Flux<List<LectureDto>> favoriteLectures() {
-        return null;
-    }
 
-    public Mono<LectureDto> registerLecture(LectureDto lectureDto) {
-        return null;
+    public Flux<Lecture> getAvailableLectures() {
+        return lectureRepository.findAllAvailableLectures();
     }
 }

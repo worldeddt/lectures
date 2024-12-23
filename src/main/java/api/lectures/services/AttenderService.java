@@ -6,7 +6,6 @@ import api.lectures.exception.ErrorCode;
 import api.lectures.repository.AttenderRepository;
 import api.lectures.services.dto.AttenderDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
