@@ -7,6 +7,7 @@ import api.lectures.exception.ErrorCode;
 import api.lectures.services.LectureApplicationService;
 import api.lectures.services.LectureService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Description;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -20,8 +21,9 @@ public class ApiController {
     private final LectureService lectureService;
     private final LectureApplicationService lectureApplicationService;
 
+    @Description("신청한 강연 취소(사번 입력)")
     @GetMapping("/applications/{attenderNumber}")
-    public Flux<ResponseLectureApplicationDto> getApplicationsByAttenderId(
+    public Flux<ResponseLectureApplicationDto> getApplicationsByAttenderNumber(
             @PathVariable String attenderNumber) {
         return lectureApplicationService.getApplicationsByAttenderNumber(attenderNumber)
                 .switchIfEmpty(
@@ -38,14 +40,16 @@ public class ApiController {
                 );
     }
 
-    @PostMapping("/{lectureId}/apply")
+    @Description("강연신청(사번 입력,같은 강연 중복 신청 제한)")
+    @PostMapping("/lecture/{lectureId}/apply")
     public Mono<ResponseEntity<Object>> applyForLecture(@PathVariable Long lectureId, @RequestParam Long attenderId) {
         return lectureApplicationService.applyForLecture(lectureId, attenderId)
                 .then(Mono.just(ResponseEntity.ok().build()))
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
 
-    @GetMapping("/available")
+    @Description("강연목록(신청가능한시점부터강연시작시간1일후까지노출)")
+    @GetMapping("/lecture/available")
     public Flux<ResponseLectureDto> getAvailableLectures() {
         return lectureService.getAvailableLectures()
                 .switchIfEmpty(
@@ -64,4 +68,12 @@ public class ApiController {
                             )
                 );
     }
+
+    @PutMapping("/lecture/application/{applicationId}/cancel")
+    public Mono<ResponseEntity<Object>> cancelApplication(@PathVariable Long applicationId) {
+        return lectureApplicationService.cancelApplication(applicationId)
+                .then(Mono.just(ResponseEntity.ok().build()))
+                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
+    }
+
 }

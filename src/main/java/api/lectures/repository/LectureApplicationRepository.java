@@ -1,6 +1,7 @@
 package api.lectures.repository;
 
 
+import api.lectures.entities.Lecture;
 import api.lectures.entities.LectureApplication;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
@@ -26,4 +27,19 @@ public interface LectureApplicationRepository extends ReactiveCrudRepository<Lec
                                          ) AND status = 'REGISTER';
 """)
     Flux<LectureApplication> findByAttenderNumber(String attenderNumber);
+
+    @Query("""
+       SELECT 
+           lec.*, 
+           COUNT(a.lecture_application_id) AS application_count
+       FROM lecture lec
+       JOIN lecture_application app
+           ON lec.id = app.lecture_id
+       WHERE app.created_at >= DATE_SUB(NOW(), INTERVAL 3 DAY)
+       AND app.status != 'CANCELED'
+       GROUP BY lec.id
+       ORDER BY application_count DESC
+       LIMIT 5
+       """)
+    Flux<Lecture> findTopPopularLecturesForLast3Days();
 }

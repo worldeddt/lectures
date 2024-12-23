@@ -28,7 +28,6 @@ public class BackOfficeController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    // 여러 강의 조회
     @GetMapping("/lecture/details")
     public Mono<ResponseEntity<List<LectureDto>>> getAllLectureDetails() {
         return lectureService.getLectureAll()

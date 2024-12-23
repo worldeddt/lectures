@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 public enum ErrorCode {
+    APPLICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "LC_0008", "application not found"),
     ATTENDER_DUPLICATED(HttpStatus.BAD_REQUEST, "LC_0007", "duplicate attender"),
     LECTURE_IS_FULL(HttpStatus.BAD_REQUEST, "LC_0006", "lecture full"),
     INVALID_ATTENDER_ID(HttpStatus.BAD_REQUEST, "LC_0005", "invalid attender id"),

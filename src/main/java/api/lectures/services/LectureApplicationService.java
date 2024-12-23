@@ -58,6 +58,20 @@ public class LectureApplicationService {
                 .doFinally(signal -> redisTemplate.delete(lockKey).subscribe()).then();
     }
 
+    @Transactional
+    public Mono<Void> cancelApplication(Long applicationId) {
+        return lectureApplicationRepository.findById(applicationId)
+                .switchIfEmpty(Mono.error(ErrorCode.APPLICATION_NOT_FOUND.build()))
+                .flatMap(application -> lectureRepository.findById(application.getLectureId())
+                        .flatMap(lecture -> {
+                            lecture.setCurrentAttendees(Math.max(lecture.getCurrentAttendees() - 1, 0)); // 신청자 수 감소
+                            application.setStatus(LectureApplicationStatus.CANCELED.name()); // 상태를 'CANCELED'로 변경
+                            return lectureRepository.save(lecture)
+                                    .then(lectureApplicationRepository.save(application)) // 상태 변경 저장
+                                    .then();
+                        }));
+    }
+
     public Flux<LectureApplication> getApplicationsByAttenderNumber(String attenderNumber) {
         return lectureApplicationRepository.findByAttenderNumber(attenderNumber);
     }
