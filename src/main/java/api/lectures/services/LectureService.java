@@ -64,7 +64,7 @@ public class LectureService {
                         )
                         .build()
                 ))
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("Lecture not found")));
+                .switchIfEmpty(Mono.error(ErrorCode.NOT_FOUND_LECTURE.build()));
     }
 
     public Mono<List<LectureDto>> getLectureAll() {

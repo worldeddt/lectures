@@ -31,11 +31,11 @@ public class LectureApplicationService {
         return redisTemplate.opsForValue().setIfAbsent(lockKey, "LOCK", Duration.ofSeconds(5))
                 .flatMap(isLocked -> {
                     if (Boolean.FALSE.equals(isLocked)) {
-                        return Mono.error(new IllegalStateException("Resource is locked by another process"));
+                        return Mono.error(ErrorCode.RESOURCE_IS_LOCKED.build());
                     }
 
                     return lectureRepository.findById(lectureId)
-                            .switchIfEmpty(Mono.error(new IllegalArgumentException("Lecture not found")))
+                            .switchIfEmpty(Mono.error(ErrorCode.NOT_FOUND_LECTURE.build()))
                             .flatMap(lecture -> {
                                 if (lecture.getCurrentAttendees() >= lecture.getMaxAttendees()) {
                                     return Mono.error(ErrorCode.LECTURE_IS_FULL.build());
