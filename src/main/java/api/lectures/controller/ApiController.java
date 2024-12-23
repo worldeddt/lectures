@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Description;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -25,59 +24,61 @@ public class ApiController {
     private final LectureService lectureService;
     private final LectureApplicationService lectureApplicationService;
 
-    @Description("신청한 강연 취소(사번 입력)")
+    @Description("신청한 내역 조회(사번 입력)")
     @GetMapping("/applications/{attenderNumber}")
-    public Flux<ResponseLectureApplicationDto> getApplicationsByAttenderNumber(
+    public Mono<ResponseEntity<List<ResponseLectureApplicationDto>>> getApplicationsByAttenderNumber(
             @PathVariable String attenderNumber) {
         return lectureApplicationService.getApplicationsByAttenderNumber(attenderNumber)
-                .switchIfEmpty(
-                        Mono.error(ErrorCode.NOT_FOUND_LECTURE.build())
-                ).flatMap(lectureApplication ->
-                        Flux.just(
-                        ResponseLectureApplicationDto.builder()
-                                .id(lectureApplication.getId())
-                                .lectureId(lectureApplication.getLectureId())
-                                .status(lectureApplication.getStatus())
-                                .attenderId(lectureApplication.getAttenderId())
-                                .build()
-                        )
-                );
-    }
+                .collectList()
+                .flatMap(lectureApplications -> {
+                    if (lectureApplications.isEmpty()) {
+                        return Mono.error(ErrorCode.NOT_FOUND_LECTURE.build());
+                    } else {
+                        List<ResponseLectureApplicationDto> responseLectureApplicationDtos = new ArrayList<>();
 
-    @Description("강연신청(사번 입력,같은 강연 중복 신청 제한)")
-    @PostMapping("/lecture/{lectureId}/apply")
-    public Mono<ResponseEntity<Object>> applyForLecture(@PathVariable Long lectureId, @RequestParam Long attenderId) {
-        return lectureApplicationService.applyForLecture(lectureId, attenderId)
-                .then(Mono.just(ResponseEntity.ok().build()))
-                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
+                        lectureApplications.forEach(lectureApplication -> {
+                            responseLectureApplicationDtos.add(
+                                    ResponseLectureApplicationDto.builder()
+                                            .id(lectureApplication.getId())
+                                            .lectureId(lectureApplication.getLectureId())
+                                            .status(lectureApplication.getStatus())
+                                            .attenderId(lectureApplication.getAttenderId())
+                                            .build()
+                            );
+                        });
+
+                        return Mono.just(ResponseEntity.ok().body(responseLectureApplicationDtos));
+                    }
+                });
     }
 
     @Description("강연 목록(신청 가능한 시점 부터 강연 시작 시간 1일 후까지 노출)")
     @GetMapping("/lecture/available")
-    public Flux<ResponseLectureDto> getAvailableLectures() {
+    public Mono<ResponseEntity<List<ResponseLectureDto>>> getAvailableLectures() {
         return lectureService.getAvailableLectures()
-                .switchIfEmpty(
-                        Flux.just()
-                ).flatMap(
-                        lecture -> Flux.just(
-                                    ResponseLectureDto.builder()
-                                            .id(lecture.getId())
-                                            .title(lecture.getTitle())
-                                            .description(lecture.getDescription())
-                                            .instructorId(lecture.getInstructorId())
-                                            .venueId(lecture.getVenueId())
-                                            .maxAttendees(lecture.getMaxAttendees())
-                                            .currentAttendees(lecture.getCurrentAttendees())
-                                            .build()
-                            )
+                .collectList()
+                .flatMap(
+                        lectures -> {
+                            if (lectures.isEmpty()) {
+                                return Mono.just(ResponseEntity.noContent().build());
+                            } else {
+                                List<ResponseLectureDto> responseLectureDtos = new ArrayList<>();
+                                for (Lecture lecture : lectures) {
+                                    responseLectureDtos.add(
+                                            ResponseLectureDto.builder()
+                                                    .id(lecture.getId())
+                                                    .title(lecture.getTitle())
+                                                    .description(lecture.getDescription())
+                                                    .instructorId(lecture.getInstructorId())
+                                                    .venueId(lecture.getVenueId())
+                                                    .maxAttendees(lecture.getMaxAttendees())
+                                                    .currentAttendees(lecture.getCurrentAttendees())
+                                                    .build());
+                                }
+                                return Mono.just(ResponseEntity.ok().body(responseLectureDtos));
+                            }
+                        }
                 );
-    }
-
-    @PutMapping("/lecture/application/{applicationId}/cancel")
-    public Mono<ResponseEntity<Object>> cancelApplication(@PathVariable Long applicationId) {
-        return lectureApplicationService.cancelApplication(applicationId)
-                .then(Mono.just(ResponseEntity.ok().build()))
-                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
 
     @GetMapping("/lecture/popular")
@@ -106,5 +107,21 @@ public class ApiController {
                             }
                         }
                 );
+    }
+
+    @Description("신청한 강연 취소")
+    @PutMapping("/lecture/application/{applicationId}/cancel")
+    public Mono<ResponseEntity<Object>> cancelApplication(@PathVariable Long applicationId) {
+        return lectureApplicationService.cancelApplication(applicationId)
+                .then(Mono.just(ResponseEntity.ok().build()))
+                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
+    }
+
+    @Description("강연신청(사번 입력,같은 강연 중복 신청 제한)")
+    @PostMapping("/lecture/{lectureId}/apply")
+    public Mono<ResponseEntity<Object>> applyForLecture(@PathVariable Long lectureId, @RequestParam Long attenderId) {
+        return lectureApplicationService.applyForLecture(lectureId, attenderId)
+                .then(Mono.just(ResponseEntity.ok().build()))
+                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
 }
