@@ -28,9 +28,15 @@ redis
 ---
 ## 기타
 
-r2dbc 와 reactive redis 를 활용하였으면 
+대량의 데이터가 들어올 것을 대비(수강 신청이 특정 시간에 몰리거나 기업 규모가 클 경우)하여
 
-비동기 프레임워크 표준 스펙인 reactor 를 이용하여 구현하였습니다. 
+효율적인 대비를 위해서 r2dbc 와 reactive redis 를 기반으로 한
+
+비동기적 처리 로직으로 구성하였습니다. 
+
+이 과정에서 non-blocking 기반의 reactive stream 표준 스펙으로 
+
+reactor 를 사용하게 되었습니다.
 
 
 

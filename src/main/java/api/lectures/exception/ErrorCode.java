@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 public enum ErrorCode {
+    NOT_FOUND_INSTRUCTOR(HttpStatus.NOT_FOUND, "LC_0010", "instructor not found"),
     NOT_FOUND_VENUE(HttpStatus.NOT_FOUND, "LC_0009", "venue not found"),
     RESOURCE_IS_LOCKED(HttpStatus.BAD_REQUEST, "LC_0009", "Resource is locked"),
     APPLICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "LC_0008", "application not found"),
