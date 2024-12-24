@@ -3,7 +3,6 @@ package api.lectures.service;
 
 import api.lectures.entities.Lecture;
 import api.lectures.entities.LectureApplication;
-import api.lectures.enums.LectureApplicationStatus;
 import api.lectures.enums.LectureStatus;
 import api.lectures.repository.LectureApplicationRepository;
 import api.lectures.repository.LectureRepository;
@@ -15,13 +14,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -38,9 +36,6 @@ public class FrontApiServiceTest {
 
     @MockitoBean
     private LectureApplicationRepository lectureApplicationRepository;
-
-    @MockitoBean
-    private ReactiveRedisTemplate<String, String> redisTemplate;
 
     //강연 신청 가능 목록 테스트
     @Test
@@ -102,7 +97,31 @@ public class FrontApiServiceTest {
     //신청 내역 조회 테스트
     @Test
     void shouldReturnApplicationsForAttender() {
+        String attenderNumber = "12345";
 
+        List<LectureApplication> lectureApplications = List.of(
+                new LectureApplication(1L, 1L, 1L, "REGISTER"),
+                new LectureApplication(2L, 2L, 1L, "REGISTER")
+        );
+
+        // Mock Repository
+        when(lectureApplicationRepository.findByAttenderNumber(attenderNumber))
+                .thenReturn(Flux.fromIterable(lectureApplications));
+
+        // Execute & Verify
+        StepVerifier.create(lectureApplicationService.getApplicationsByAttenderNumber(attenderNumber))
+                .expectNextMatches(responseDtos -> {
+                    assertEquals(2, responseDtos.size());
+                    assertEquals(1L, responseDtos.get(0).getId());
+                    assertEquals("REGISTER", responseDtos.get(0).getStatus());
+                    assertEquals(2L, responseDtos.get(1).getId());
+                    assertEquals("REGISTER", responseDtos.get(1).getStatus());
+                    return true;
+                })
+                .verifyComplete();
+
+        // Verify Repository Interaction
+        verify(lectureApplicationRepository, times(1)).findByAttenderNumber(attenderNumber);
     }
 
     //신청 취소 테스트

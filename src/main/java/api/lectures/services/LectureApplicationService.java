@@ -1,6 +1,7 @@
 package api.lectures.services;
 
 
+import api.lectures.controller.dto.ResponseLectureApplicationDto;
 import api.lectures.entities.Lecture;
 import api.lectures.entities.LectureApplication;
 import api.lectures.enums.LectureApplicationStatus;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -73,8 +75,15 @@ public class LectureApplicationService {
                         }));
     }
 
-    public Flux<LectureApplication> getApplicationsByAttenderNumber(String attenderNumber) {
-        return lectureApplicationRepository.findByAttenderNumber(attenderNumber);
+    public Mono<List<ResponseLectureApplicationDto>> getApplicationsByAttenderNumber(String attenderNumber) {
+        return lectureApplicationRepository.findByAttenderNumber(attenderNumber)
+                .map(lectureApplication -> ResponseLectureApplicationDto.builder()
+                        .id(lectureApplication.getId())
+                        .lectureId(lectureApplication.getLectureId())
+                        .status(lectureApplication.getStatus())
+                        .attenderId(lectureApplication.getAttenderId())
+                        .build())
+                .collectList();
     }
 
     public Flux<Lecture> getPopularLectures() {

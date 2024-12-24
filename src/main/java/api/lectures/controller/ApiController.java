@@ -29,27 +29,8 @@ public class ApiController {
     public Mono<ResponseEntity<List<ResponseLectureApplicationDto>>> getApplicationsByAttenderNumber(
             @PathVariable String attenderNumber) {
         return lectureApplicationService.getApplicationsByAttenderNumber(attenderNumber)
-                .collectList()
-                .flatMap(lectureApplications -> {
-                    if (lectureApplications.isEmpty()) {
-                        return Mono.error(ErrorCode.NOT_FOUND_LECTURE.build());
-                    } else {
-                        List<ResponseLectureApplicationDto> responseLectureApplicationDtos = new ArrayList<>();
-
-                        lectureApplications.forEach(lectureApplication -> {
-                            responseLectureApplicationDtos.add(
-                                    ResponseLectureApplicationDto.builder()
-                                            .id(lectureApplication.getId())
-                                            .lectureId(lectureApplication.getLectureId())
-                                            .status(lectureApplication.getStatus())
-                                            .attenderId(lectureApplication.getAttenderId())
-                                            .build()
-                            );
-                        });
-
-                        return Mono.just(ResponseEntity.ok().body(responseLectureApplicationDtos));
-                    }
-                });
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @Description("강연 목록(신청 가능한 시점 부터 강연 시작 시간 1일 후까지 노출)")
