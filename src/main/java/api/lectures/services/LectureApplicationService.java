@@ -2,6 +2,7 @@ package api.lectures.services;
 
 
 import api.lectures.controller.dto.ResponseLectureApplicationDto;
+import api.lectures.controller.dto.ResponseLectureDto;
 import api.lectures.entities.Lecture;
 import api.lectures.entities.LectureApplication;
 import api.lectures.enums.LectureApplicationStatus;
@@ -86,7 +87,17 @@ public class LectureApplicationService {
                 .collectList();
     }
 
-    public Flux<Lecture> getPopularLectures() {
-        return lectureApplicationRepository.findTopPopularLecturesForLast3Days();
+    public Mono<List<ResponseLectureDto>> getPopularLectures() {
+        return lectureApplicationRepository.findTopPopularLecturesForLast3Days()
+                .map(lecture -> ResponseLectureDto.builder()
+                        .id(lecture.getId())
+                        .title(lecture.getTitle())
+                        .description(lecture.getDescription())
+                        .instructorId(lecture.getInstructorId())
+                        .venueId(lecture.getVenueId())
+                        .maxAttendees(lecture.getMaxAttendees())
+                        .currentAttendees(lecture.getCurrentAttendees())
+                        .build())
+                .collectList();
     }
 }

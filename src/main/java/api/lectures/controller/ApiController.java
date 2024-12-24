@@ -67,29 +67,8 @@ public class ApiController {
     @GetMapping("/lectures/popular")
     public Mono<ResponseEntity<List<ResponseLectureDto>>> getPopularLectures() {
         return lectureApplicationService.getPopularLectures()
-                .collectList()
-                .flatMap(
-                        lectures -> {
-                            if (lectures.isEmpty()) {
-                                return Mono.just(ResponseEntity.noContent().build());
-                            } else {
-                                List<ResponseLectureDto> responseLectureDtos = new ArrayList<>();
-                                for (Lecture lecture : lectures) {
-                                    responseLectureDtos.add(
-                                            ResponseLectureDto.builder()
-                                                    .id(lecture.getId())
-                                                    .title(lecture.getTitle())
-                                                    .description(lecture.getDescription())
-                                                    .instructorId(lecture.getInstructorId())
-                                                    .venueId(lecture.getVenueId())
-                                                    .maxAttendees(lecture.getMaxAttendees())
-                                                    .currentAttendees(lecture.getCurrentAttendees())
-                                                    .build());
-                                }
-                                return Mono.just(ResponseEntity.ok().body(responseLectureDtos));
-                            }
-                        }
-                );
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @Description("신청한 강연 취소")
