@@ -19,7 +19,7 @@ public class VenueController {
     private final VenueService venueService;
 
     @PostMapping("")
-    public Mono<ResponseEntity<Venue>> creat(@RequestBody CreateVenueDto createVenueDto) {
+    public Mono<ResponseEntity<Venue>> create(@RequestBody CreateVenueDto createVenueDto) {
         return venueService.create(createVenueDto)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.noContent().build());

@@ -71,6 +71,7 @@ public class ApiController {
                                                     .description(lecture.getDescription())
                                                     .instructorId(lecture.getInstructorId())
                                                     .venueId(lecture.getVenueId())
+                                                    .startTime(lecture.getStartTime())
                                                     .maxAttendees(lecture.getMaxAttendees())
                                                     .currentAttendees(lecture.getCurrentAttendees())
                                                     .build());

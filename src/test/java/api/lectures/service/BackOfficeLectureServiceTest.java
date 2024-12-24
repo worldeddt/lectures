@@ -3,6 +3,7 @@ package api.lectures.service;
 import api.lectures.entities.Attender;
 import api.lectures.entities.Lecture;
 import api.lectures.entities.LectureApplication;
+import api.lectures.enums.LectureStatus;
 import api.lectures.repository.AttenderRepository;
 import api.lectures.repository.LectureApplicationRepository;
 import api.lectures.repository.LectureRepository;
@@ -44,17 +45,20 @@ class BackOfficeLectureServiceTest {
                     "Reactive Programming",
                     "Learn Reactive Programming",
                     50, 30,
-                    LocalDateTime.of(2024, 12, 30, 10, 0), 1L, 1L),
+                    LocalDateTime.of(2024, 12, 30, 10, 0), 1L, 1L,
+                    LectureStatus.REGISTER),
             new Lecture(2L,
                     "Spring WebFlux",
                     "Introduction to WebFlux",
                     100, 80,
-                    LocalDateTime.of(2024, 12, 25, 14, 0), 2L, 2L),
+                    LocalDateTime.of(2024, 12, 25, 14, 0), 2L, 2L,
+                    LectureStatus.REGISTER),
             new Lecture(3L,
                     "Spring WebFlux",
                     "Introduction to WebFlux",
                     100, 80,
-                    LocalDateTime.of(2024, 12, 25, 14, 0), 2L, 2L)
+                    LocalDateTime.of(2024, 12, 25, 14, 0), 2L, 2L,
+                    LectureStatus.REGISTER)
         );
 
         when(lectureRepository.findAll()).thenReturn(Flux.fromIterable(lectures));

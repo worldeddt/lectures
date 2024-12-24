@@ -1,6 +1,7 @@
 package api.lectures.entities;
 
 
+import api.lectures.enums.LectureStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,4 +28,5 @@ public class Lecture extends BaseEntity {
     private LocalDateTime startTime;
     private Long instructorId;
     private Long venueId;
+    private LectureStatus status;
 }

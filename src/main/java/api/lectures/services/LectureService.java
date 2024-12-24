@@ -6,6 +6,7 @@ import api.lectures.entities.Instructor;
 import api.lectures.entities.Lecture;
 import api.lectures.entities.Venue;
 import api.lectures.enums.LectureApplicationStatus;
+import api.lectures.enums.LectureStatus;
 import api.lectures.exception.ErrorCode;
 import api.lectures.repository.*;
 import api.lectures.services.dto.AttenderDto;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -116,6 +119,8 @@ public class LectureService {
     }
 
     public Mono<Lecture> createLecture(CreateLectureDto request) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
         // 강연자와 강연장의 유효성 검증
         return instructorRepository.findById(request.getInstructorId())
                 .switchIfEmpty(
@@ -138,10 +143,12 @@ public class LectureService {
                             // 유효성 검증 성공 시 Lecture 생성
                             Lecture lecture = new Lecture();
                             lecture.setTitle(request.getTitle());
-                            lecture.setStartTime(request.getStartTime());
+                            lecture.setDescription(request.getDescription());
+                            lecture.setStartTime(LocalDateTime.parse(request.getStartTime(), formatter));
                             lecture.setInstructorId(request.getInstructorId());
                             lecture.setVenueId(request.getVenueId());
                             lecture.setMaxAttendees(request.getSeatCount());
+                            lecture.setStatus(LectureStatus.REGISTER);
                             return lectureRepository.save(lecture);
                         })
                 );
