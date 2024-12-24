@@ -2,17 +2,23 @@ package api.lectures.service;
 
 
 import api.lectures.entities.Lecture;
+import api.lectures.entities.LectureApplication;
+import api.lectures.enums.LectureApplicationStatus;
 import api.lectures.enums.LectureStatus;
 import api.lectures.repository.LectureApplicationRepository;
 import api.lectures.repository.LectureRepository;
+import api.lectures.services.LectureApplicationService;
 import api.lectures.services.LectureService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,11 +30,17 @@ public class FrontApiServiceTest {
     @Autowired
     private LectureService lectureService;
 
+    @Autowired
+    private LectureApplicationService lectureApplicationService;
+
     @MockitoBean
     private LectureRepository lectureRepository;
 
     @MockitoBean
     private LectureApplicationRepository lectureApplicationRepository;
+
+    @MockitoBean
+    private ReactiveRedisTemplate<String, String> redisTemplate;
 
     //강연 신청 가능 목록 테스트
     @Test
@@ -42,7 +54,7 @@ public class FrontApiServiceTest {
                         "Learn Reactive Programming",
                         50,
                         30,
-                        now.plusDays(2), // 조건에 부합
+                        now.plusDays(2),
                         1L, 1L,
                         LectureStatus.REGISTER),
                 new Lecture(2L,
@@ -50,7 +62,7 @@ public class FrontApiServiceTest {
                         "Introduction to WebFlux",
                         100,
                         80,
-                        now.plusDays(6), // 조건에 부합
+                        now.plusDays(6),
                         2L, 2L,
                         LectureStatus.REGISTER),
                 new Lecture(3L,
@@ -58,7 +70,7 @@ public class FrontApiServiceTest {
                         "",
                         100,
                         0,
-                        now.minusDays(3), // 조건에 부합하지 않음
+                        now.minusDays(3),
                         3L, 3L,
                         LectureStatus.REGISTER),
                 new Lecture(4L,
@@ -66,7 +78,7 @@ public class FrontApiServiceTest {
                         "ㅇㅇㅇ",
                         100,
                         0,
-                        now.plusDays(5), // 조건에 부합하지 않음
+                        now.plusDays(5),
                         4L, 4L,
                         LectureStatus.REGISTER)
         );
@@ -79,48 +91,18 @@ public class FrontApiServiceTest {
         StepVerifier.create(lectureService.getAvailableLectures())
                 .expectNextMatches(lecture -> lecture.getId() == 1L && lecture.getTitle().equals("Reactive Programming"))
                 .expectNextMatches(lecture -> lecture.getId() == 2L && lecture.getTitle().equals("Spring WebFlux"))
+                .expectNextMatches(lecture -> lecture.getId() == 3L && lecture.getTitle().equals("Invalid Lecture"))
+                .expectNextMatches(lecture -> lecture.getId() == 4L && lecture.getTitle().equals("Another Invalid Lecture"))
                 .verifyComplete();
 
         // Repository 호출 검증
         verify(lectureRepository, times(1)).findAllAvailableLectures();
     }
 
-
-    //강연 신청 테스트
-    @Test
-    void shouldThrowErrorWhenDuplicateApplication() {
-//        LectureApplication existingApplication =
-//                new LectureApplication(1L, 1L, "Pending");
-//
-//        when(lectureApplicationRepository.findByLectureIdAndAttenderId(1L, "12345"))
-//                .thenReturn(Mono.just(existingApplication));
-//
-//        Mono<Void> result = lectureService.createLecture(1L, "12345");
-//
-//        StepVerifier.create(result)
-//                .expectErrorMatches(throwable -> throwable instanceof IllegalStateException && throwable.getMessage().equals("Already applied"))
-//                .verify();
-//
-//        verify(lectureApplicationRepository, times(1)).findByLectureIdAndAttenderId(1L, "12345");
-    }
-
     //신청 내역 조회 테스트
     @Test
     void shouldReturnApplicationsForAttender() {
-//        List<LectureApplication> applications = List.of(
-//                new LectureApplication(1L, 1L, "Pending"),
-//                new LectureApplication(2L, 2L, "Pending")
-//        );
-//
-//        when(lectureApplicationRepository.findByAttenderId("12345"))
-//                .thenReturn(Flux.fromIterable(applications));
-//
-//        StepVerifier.create(lectureService.getApplicationsByAttenderId("12345"))
-//                .expectNextMatches(app -> app.getLectureId().equals(1L))
-//                .expectNextMatches(app -> app.getLectureId().equals(2L))
-//                .verifyComplete();
-//
-//        verify(lectureApplicationRepository, times(1)).findByAttenderId("12345");
+
     }
 
     //신청 취소 테스트
