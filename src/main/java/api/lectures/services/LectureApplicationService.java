@@ -29,8 +29,6 @@ public class LectureApplicationService {
 
     @Transactional(rollbackFor = Exception.class)
     public Mono<Void> applyForLecture(Long lectureId, Long attenderId) {
-        log.info("attenderId : {}", attenderId);
-        log.info("lectureId : {}", lectureId);
         String lockKey = "lecture:" + lectureId;
 
         return redisTemplate.opsForValue().setIfAbsent(lockKey, "LOCK", Duration.ofSeconds(3))

@@ -20,7 +20,7 @@ public class LectureApplication extends BaseEntity {
     private Long id;
     @Column("attender_id")
     private Long attenderId;
-    @Column("attender_id")
+    @Column("lecture_id")
     private Long lectureId;
     private String status;
 }
