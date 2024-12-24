@@ -11,7 +11,6 @@ import api.lectures.services.LectureService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -124,40 +123,49 @@ public class FrontApiServiceTest {
         verify(lectureApplicationRepository, times(1)).findByAttenderNumber(attenderNumber);
     }
 
-    //신청 취소 테스트
-    @Test
-    void shouldCancelApplicationSuccessfully() {
-//        LectureApplication application = new LectureApplication(1L, 1L, "Pending");
-//
-//        when(lectureApplicationRepository.findById(1L))
-//                .thenReturn(Mono.just(application));
-//        when(lectureApplicationRepository.save(any()))
-//                .thenReturn(Mono.just(application));
-//
-//        Mono<Void> result = lectureService.cancelApplication(1L);
-//
-//        StepVerifier.create(result)
-//                .verifyComplete();
-//
-//        verify(lectureApplicationRepository, times(1)).findById(1L);
-//        verify(lectureApplicationRepository, times(1)).save(any());
-    }
-
     //실시간 인기 강연 테스트
     @Test
     void shouldReturnTopPopularLectures() {
-//        List<Lecture> popularLectures = List.of(
-//                new Lecture(1L, "Reactive Programming", "Learn Reactive Programming", 50, 30, LocalDateTime.of(2024, 12, 30, 10, 0), 1L, 1L),
-//                new Lecture(2L, "Spring WebFlux", "Introduction to WebFlux", 100, 80, LocalDateTime.of(2024, 12, 25, 14, 0), 2L, 2L)
-//        );
-//
-//        when(lectureRepository.findTopPopularLecturesForLast3Days())
-//                .thenReturn(Flux.fromIterable(popularLectures));
-//
-//        StepVerifier.create(lectureService.getPopularLectures())
-//                .expectNextCount(2)
-//                .verifyComplete();
-//
-//        verify(lectureRepository, times(1)).findTopPopularLecturesForLast3Days();
+        // Mock 데이터
+        List<Lecture> popularLectures = List.of(
+                new Lecture(1L,
+                        "Reactive Programming",
+                        "Learn Reactive Programming",
+                        50, 30,
+                        LocalDateTime.now().minusDays(1),
+                        1L, 1L, LectureStatus.REGISTER),
+                new Lecture(2L,
+                        "Spring WebFlux",
+                        "Introduction to WebFlux",
+                        100, 80,
+                        LocalDateTime.now().minusDays(2),
+                        2L, 2L, LectureStatus.REGISTER)
+        );
+
+        // Mocking
+        when(lectureApplicationRepository.findTopPopularLecturesForLast3Days())
+                .thenReturn(Flux.fromIterable(popularLectures));
+
+        // 실행 및 검증
+        StepVerifier.create(lectureApplicationService.getPopularLectures())
+                .expectNextMatches(lectures -> {
+                    assertEquals(2, lectures.size());
+
+                    // 첫 번째 인기 강연 검증
+                    assertEquals(1L, lectures.get(0).getId());
+                    assertEquals("Reactive Programming", lectures.get(0).getTitle());
+                    assertEquals(30, lectures.get(0).getCurrentAttendees());
+
+                    // 두 번째 인기 강연 검증
+                    assertEquals(2L, lectures.get(1).getId());
+                    assertEquals("Spring WebFlux", lectures.get(1).getTitle());
+                    assertEquals(80, lectures.get(1).getCurrentAttendees());
+
+                    return true;
+                })
+                .verifyComplete();
+
+        // Repository 호출 검증
+        verify(lectureApplicationRepository, times(1)).findTopPopularLecturesForLast3Days();
     }
 }

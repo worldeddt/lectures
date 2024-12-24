@@ -1,6 +1,7 @@
 package api.lectures.controller;
 
 
+import api.lectures.controller.dto.ApplyLectureDto;
 import api.lectures.controller.dto.ResponseLectureApplicationDto;
 import api.lectures.controller.dto.ResponseLectureDto;
 import api.lectures.entities.Lecture;
@@ -80,9 +81,10 @@ public class ApiController {
     }
 
     @Description("강연 신청(사번 입력,같은 강연 중복 신청 제한)")
-    @PostMapping("/lecture/{lectureId}/apply")
-    public Mono<ResponseEntity<Object>> applyForLecture(@PathVariable Long lectureId, @RequestParam Long attenderId) {
-        return lectureApplicationService.applyForLecture(lectureId, attenderId)
+    @PostMapping("/lecture/apply")
+    public Mono<ResponseEntity<Object>> applyForLecture(@RequestBody ApplyLectureDto applyLectureDto) {
+        return lectureApplicationService.applyForLecture(
+                applyLectureDto.getLectureId(), applyLectureDto.getAttenderId())
                 .then(Mono.just(ResponseEntity.ok().build()))
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }

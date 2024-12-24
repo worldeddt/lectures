@@ -3,22 +3,22 @@ package api.lectures.services;
 
 import api.lectures.controller.dto.ResponseLectureApplicationDto;
 import api.lectures.controller.dto.ResponseLectureDto;
-import api.lectures.entities.Lecture;
 import api.lectures.entities.LectureApplication;
 import api.lectures.enums.LectureApplicationStatus;
 import api.lectures.exception.ErrorCode;
 import api.lectures.repository.LectureApplicationRepository;
 import api.lectures.repository.LectureRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LectureApplicationService {
@@ -27,26 +27,28 @@ public class LectureApplicationService {
     private final LectureRepository lectureRepository;
     private final ReactiveRedisTemplate<String, String> redisTemplate;
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Mono<Void> applyForLecture(Long lectureId, Long attenderId) {
+        log.info("attenderId : {}", attenderId);
+        log.info("lectureId : {}", lectureId);
         String lockKey = "lecture:" + lectureId;
 
-        return redisTemplate.opsForValue().setIfAbsent(lockKey, "LOCK", Duration.ofSeconds(5))
+        return redisTemplate.opsForValue().setIfAbsent(lockKey, "LOCK", Duration.ofSeconds(3))
+                .doOnSuccess(isLocked -> log.info("Redis Lock set: {}", isLocked))
                 .flatMap(isLocked -> {
                     if (Boolean.FALSE.equals(isLocked)) {
                         return Mono.error(ErrorCode.RESOURCE_IS_LOCKED.build());
                     }
-
                     return lectureRepository.findById(lectureId)
+                            .doOnNext(lecture -> log.info("Lecture found: {}", lecture))
                             .switchIfEmpty(Mono.error(ErrorCode.NOT_FOUND_LECTURE.build()))
                             .flatMap(lecture -> {
                                 if (lecture.getCurrentAttendees() >= lecture.getMaxAttendees()) {
                                     return Mono.error(ErrorCode.LECTURE_IS_FULL.build());
                                 }
                                 return lectureApplicationRepository.findByLectureIdAndAttenderId(lectureId, attenderId)
-                                        .flatMap(existing ->
-                                            Mono.error(ErrorCode.ATTENDER_DUPLICATED.build())
-                                        )
+                                        .doOnNext(existing -> log.info("Existing application found: {}", existing))
+                                        .flatMap(existing -> Mono.error(ErrorCode.ATTENDER_DUPLICATED.build()))
                                         .switchIfEmpty(Mono.defer(() -> {
                                             lecture.setCurrentAttendees(lecture.getCurrentAttendees() + 1);
                                             LectureApplication application = new LectureApplication();
@@ -54,12 +56,20 @@ public class LectureApplicationService {
                                             application.setAttenderId(attenderId);
                                             application.setStatus(LectureApplicationStatus.REGISTER.name());
                                             return lectureRepository.save(lecture)
-                                                    .then(lectureApplicationRepository.save(application))
-                                                    .then();
+                                                    .doOnSuccess(savedLecture -> log.info("Lecture saved: {}", savedLecture))
+                                                    .then(lectureApplicationRepository.save(application)
+                                                            .onErrorResume( e -> {
+                                                                log.info(e.getMessage());
+                                                                return null;
+                                                            })
+                                                            .doOnSuccess(savedApplication -> log.info("Application saved: {}", savedApplication)));
                                         }));
                             });
                 })
-                .doFinally(signal -> redisTemplate.delete(lockKey).subscribe()).then();
+                .doFinally(signal -> redisTemplate.delete(lockKey)
+                        .doOnSuccess(deleted -> log.info("Lock deleted for key: {}", lockKey))
+                        .subscribe())
+                .then();
     }
 
     @Transactional

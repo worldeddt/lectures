@@ -13,7 +13,7 @@ create table venue (created_at DATETIME, seat_count bigint, updated_at DATETIME,
 alter table attender add constraint attender_number_unique unique (attender_number);
 alter table lecture add constraint lecture_instructor_id foreign key (instructor_id) references instructor (instructor_id);
 alter table lecture add constraint lecture_venue_id foreign key (venue_id) references venue (venue_id);
-alter table lecture_application add constraint lecture_application_attender_id foreign key (attender_id) references attender (attender_id);
+# alter table lecture_application add constraint lecture_application_attender_id foreign key (attender_id) references attender (attender_id);
 alter table lecture_application add constraint lecture_application_lecture_id foreign key (lecture_id) references lecture (lecture_id);
 
 
