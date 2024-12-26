@@ -2,10 +2,8 @@ package api.lectures.service;
 
 
 import api.lectures.LecturesApplication;
-import api.lectures.entities.Instructor;
 import api.lectures.entities.Lecture;
 import api.lectures.entities.LectureApplication;
-import api.lectures.entities.Venue;
 import api.lectures.enums.LectureApplicationStatus;
 import api.lectures.enums.LectureStatus;
 import api.lectures.repository.InstructorRepository;
@@ -26,10 +24,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;

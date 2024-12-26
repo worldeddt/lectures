@@ -5,7 +5,6 @@ import api.lectures.controller.dto.ApplyLectureDto;
 import api.lectures.controller.dto.ResponseLectureApplicationDto;
 import api.lectures.controller.dto.ResponseLectureDto;
 import api.lectures.entities.Lecture;
-import api.lectures.exception.ErrorCode;
 import api.lectures.services.LectureApplicationService;
 import api.lectures.services.LectureService;
 import lombok.RequiredArgsConstructor;
