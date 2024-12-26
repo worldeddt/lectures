@@ -1,22 +1,35 @@
 package api.lectures.service;
 
 
+import api.lectures.LecturesApplication;
+import api.lectures.entities.Instructor;
 import api.lectures.entities.Lecture;
 import api.lectures.entities.LectureApplication;
+import api.lectures.entities.Venue;
+import api.lectures.enums.LectureApplicationStatus;
 import api.lectures.enums.LectureStatus;
+import api.lectures.repository.InstructorRepository;
 import api.lectures.repository.LectureApplicationRepository;
 import api.lectures.repository.LectureRepository;
+import api.lectures.repository.VenueRepository;
 import api.lectures.services.LectureApplicationService;
 import api.lectures.services.LectureService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -35,6 +48,16 @@ public class FrontApiServiceTest {
 
     @MockitoBean
     private LectureApplicationRepository lectureApplicationRepository;
+    @Autowired
+    private InstructorRepository instructorRepository;
+    @Autowired
+    private VenueRepository venueRepository;
+
+    @Autowired
+    @Qualifier("reactiveStringRedisTemplate")
+    private ReactiveRedisTemplate<String, String> redisTemplate;
+    @Autowired
+    private LecturesApplication lecturesApplication;
 
     //강연 신청 가능 목록 테스트
     @Test
@@ -167,5 +190,86 @@ public class FrontApiServiceTest {
 
         // Repository 호출 검증
         verify(lectureApplicationRepository, times(1)).findTopPopularLecturesForLast3Days();
+    }
+
+    /**
+     Instructor mockInstructor =
+     Instructor.builder()
+     .id(2L)
+     .name("david")
+     .phone("00011112222")
+     .build();
+
+     Venue mockVenue = Venue
+     .builder()
+     .id(1L)
+     .name("abc")
+     .address("본관 2층")
+     .seatCount(20L).build();
+     */
+
+    //강연 신청
+    @Test
+    void applyLectureTest() {
+        //given
+        Long attenderId = 1L;
+        Long lectureId = 2L;
+
+        Lecture mockLecture =
+                Lecture.builder()
+                    .id(lectureId)
+                    .title("2강의")
+                    .maxAttendees(20)
+                    .currentAttendees(0)
+                    .description("양자터널링에 관한 강의")
+                    .status(LectureStatus.REGISTER)
+                    .startTime(LocalDateTime.now().minusDays(1))
+                    .instructorId(2L)
+                    .venueId(1L)
+                    .build();
+
+        LectureApplication mockApplication =
+                LectureApplication.builder()
+                .id(1L)
+                .lectureId(mockLecture.getId())
+                .attenderId(attenderId)
+                .status(LectureApplicationStatus.REGISTER.name())
+                .build();
+
+        when(lectureRepository.findById(lectureId))
+                .thenReturn(Mono.just(mockLecture));
+        when(lectureApplicationRepository.findByLectureIdAndAttenderId(lectureId, attenderId))
+                .thenReturn(Mono.empty());
+        when(lectureRepository.save(any(Lecture.class)))
+                .thenReturn(Mono.just(mockLecture));
+        when(lectureApplicationRepository.save(any(LectureApplication.class)))
+                .thenReturn(Mono.just(mockApplication));
+
+        //then
+        // Execute & Verify
+        StepVerifier.create(
+                lectureApplicationService.applyForLecture(lectureId, attenderId))
+                .expectNextMatches( object -> {
+                    try {
+                        String s = new ObjectMapper().writeValueAsString(object);
+                        LectureApplication lectureApplication = new ObjectMapper().readValue(s, LectureApplication.class);
+                        assertEquals(1L, lectureApplication.getId());
+                        assertEquals(attenderId, lectureApplication.getAttenderId());
+                        assertEquals(lectureId, lectureApplication.getLectureId());
+                        assertEquals(LectureStatus.REGISTER.name(), lectureApplication.getStatus());
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    return true;
+                })
+                .verifyComplete();
+
+        verify(lectureRepository, times(1)).findById(lectureId);
+        verify(lectureApplicationRepository, times(1)).
+                findByLectureIdAndAttenderId(lectureId, attenderId);
+        verify(lectureRepository, times(1)).save(any(Lecture.class));
+        verify(lectureApplicationRepository, times(1)).save(any(LectureApplication.class));
+
     }
 }

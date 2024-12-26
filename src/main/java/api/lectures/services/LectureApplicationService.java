@@ -28,7 +28,7 @@ public class LectureApplicationService {
     private final ReactiveRedisTemplate<String, String> redisTemplate;
 
     @Transactional(rollbackFor = Exception.class)
-    public Mono<Void> applyForLecture(Long lectureId, Long attenderId) {
+    public Mono<Object> applyForLecture(Long lectureId, Long attenderId) {
         String lockKey = "lecture:" + lectureId;
 
         return redisTemplate.opsForValue().setIfAbsent(lockKey, "LOCK", Duration.ofSeconds(3))
@@ -66,8 +66,7 @@ public class LectureApplicationService {
                 })
                 .doFinally(signal -> redisTemplate.delete(lockKey)
                         .doOnSuccess(deleted -> log.info("Lock deleted for key: {}", lockKey))
-                        .subscribe())
-                .then();
+                        .subscribe());
     }
 
     @Transactional
